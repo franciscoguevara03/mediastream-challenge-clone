@@ -1,5 +1,5 @@
 import './assets/styles.css'
-import { useState } from 'react'
+import React, { useState } from 'react'
 
 export default function Exercise01 () {
   const movies = [
@@ -40,23 +40,83 @@ export default function Exercise01 () {
     }
   ]
 
-  const [cart, setCart] = useState([
-    {
-      id: 1,
-      name: 'Star Wars',
-      price: 20,
-      quantity: 2
-    }
-  ])
+  const [cart, setCart] = useState([])
 
-  const getTotal = () => 0 // TODO: Implement this
+  const handleAddItemToCart = (item) => {
+    setCart((prev) => {
+      const isItemInTheCart = prev.find((i) => i.id === item.id)
+      if (isItemInTheCart) {
+        return prev.map((i) =>
+          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+        )
+      }
+      return [...prev, { ...item, quantity: 1 }]
+    })
+  }
+
+  const handleIncrementCart = (item) => {
+    setCart((prev) => {
+      const isItemInTheCart = prev.find((i) => i.id === item.id)
+      if (isItemInTheCart) {
+        return prev.map((i) =>
+          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+        )
+      }
+      return [...prev, { ...item, quantity: 1 }]
+    })
+  }
+
+  const removeItemCart = (item) => {
+    const id = item.id
+    setCart((item) =>
+      item.filter((cart) => cart.id !== id)
+    )
+  }
+
+  const handleDecrementCart = (item) => {
+    if (item.quantity < 2) {
+      removeItemCart(item)
+    } else {
+      setCart((prev) => {
+        const isItemInTheCart = prev.find((i) => i.id === item.id)
+        if (isItemInTheCart) {
+          return prev.map((i) =>
+            i.id === item.id ? { ...i, quantity: i.quantity - 1 } : i
+          )
+        }
+        return [...prev, { ...item, quantity: 1 }]
+      })
+    }
+  }
+  const { discount, m } = discountRules[0]
+  const { discount: discount1, m: m1 } = discountRules[1]
+  const { discount: discount2, m: m2 } = discountRules[2]
+  const validar = () => {
+    const encontrado = cart.filter(x => x.id === m[0])
+    const encontrado2 = cart.filter(x => x.id === m[1])
+    const encontrado3 = cart.filter(x => x.id === m1[0])
+    const encontrado4 = cart.filter(x => x.id === m1[1])
+    const encontrado5 = cart.filter(x => x.id === m1[2])
+    const encontrado6 = cart.filter(x => x.id === m2[0])
+    const encontrado7 = cart.filter(x => x.id === m2[1])
+    if (encontrado.length && encontrado2.length) {
+      return discount
+    } if (encontrado3.length && encontrado4.length && encontrado5.length) {
+      return discount1
+    } if (encontrado6.length && encontrado7.length) {
+      return discount2
+    } else {
+      return 0
+    }
+  }
+  const getTotal = () => cart.reduce((sum, i) => (sum + i.price * i.quantity) - ((i.price * i.quantity) * validar()), 0) // TODO: Implement this
 
   return (
     <section className="exercise01">
       <div className="movies__list">
         <ul>
           {movies.map(o => (
-            <li className="movies__list-card">
+            <li className="movies__list-card" key={o.id}>
               <ul>
                 <li>
                   ID: {o.id}
@@ -68,7 +128,7 @@ export default function Exercise01 () {
                   Price: ${o.price}
                 </li>
               </ul>
-              <button onClick={() => console.log('Add to cart', o)}>
+              <button onClick={() => handleAddItemToCart(o)}>
                 Add to cart
               </button>
             </li>
@@ -78,7 +138,7 @@ export default function Exercise01 () {
       <div className="movies__cart">
         <ul>
           {cart.map(x => (
-            <li className="movies__cart-card">
+            <li className="movies__cart-card" key={x.id}>
               <ul>
                 <li>
                   ID: {x.id}
@@ -91,13 +151,13 @@ export default function Exercise01 () {
                 </li>
               </ul>
               <div className="movies__cart-card-quantity">
-                <button onClick={() => console.log('Decrement quantity', x)}>
+                <button onClick={() => handleDecrementCart(x)}>
                   -
                 </button>
                 <span>
                   {x.quantity}
                 </span>
-                <button onClick={() => console.log('Increment quantity', x)}>
+                <button onClick={() => handleIncrementCart(x)}>
                   +
                 </button>
               </div>
@@ -105,7 +165,7 @@ export default function Exercise01 () {
           ))}
         </ul>
         <div className="movies__cart-total">
-          <p>Total: ${getTotal()}</p>
+          <p>Total: ${getTotal().toFixed(2)}</p>
         </div>
       </div>
     </section>
